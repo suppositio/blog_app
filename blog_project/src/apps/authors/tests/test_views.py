@@ -34,10 +34,14 @@ class AuthorViewTest(TestCase):
         response = self.client.post(self.list_url, self.author_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Author.objects.count(), 1)
+        for field in self.author_data.keys():
+            self.assertEqual(response.data[field], self.author_data[field])
 
     def test_get_detail_found(self):
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for field in self.author_data.keys():
+            self.assertEqual(response.data[field], self.author_data[field])        
 
     def test_get_detail_not_found(self):
         self.author.delete()
@@ -51,7 +55,7 @@ class AuthorViewTest(TestCase):
         self.author.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for field in update_data.keys():
-            self.assertEqual(getattr(self.author, field), update_data[field])
+            self.assertEqual(response.data[field], update_data[field])
 
     def test_put_not_found(self):
         self.author.delete()
@@ -65,7 +69,7 @@ class AuthorViewTest(TestCase):
         response = self.client.patch(self.detail_url, update_data, format='json')
         self.author.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.author.last_name, update_data['last_name'])
+        self.assertEqual(response.data['last_name'], update_data['last_name'])
 
     def test_patch_not_found(self):
         self.author.delete()        
@@ -82,6 +86,4 @@ class AuthorViewTest(TestCase):
         self.author.delete()
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-
     
